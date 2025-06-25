@@ -130,6 +130,142 @@ def WriteListToCSV(fileName, playerList):
 WriteListToCSV("batters.csv", batterList)
 WriteListToCSV("pitchers.csv", pitcherList)
 
+#Stats Maths
+def leagueAverages(arr):
+    totalOBP = 0
+    totalSLG = 0
+    validPeople = 0
+    for player in arr:
+        if player["PA"] >= 5:
+            totalOBP += player["OBP"]
+            totalSLG += player["SLG"]
+            validPeople += 1
+    return totalOBP, totalSLG, validPeople
+
+def PlateAppearances(arr):
+    for player in arr:
+        PA = player["BB"] + player["HBP"] + player["SF"] + player["SH"] + player["AB"]
+        player["PA"] = PA
+
+def WalkPercentage(arr):
+    for player in arr:
+        try:
+            BBPercentage = (player["BB"]/player["PA"])*100
+            player["BB%"] = BBPercentage
+        except:
+            player["BB%"] = "N/A"
+
+def StrikeOutPercentage(arr):
+    for player in arr:
+        try:
+            SOPercentage = (player["SO"]/player["PA"])*100
+            player["SO%"] = SOPercentage
+        except:
+            player["SO%"] = "N/A"
+
+def StealSuccessRate(arr):
+    for player in arr:
+        try:
+            SSR = (player["SB"]/(player["SB"] + player["CS"]))*100
+            player["SSR"] = SSR
+        except:
+            player["SSR"] = "N/A"
+
+def Singles(arr):
+    for player in arr:
+        OneB = player["H"] - (player["2B"] + player["3B"] + player["HR"])
+        player["1B"] = OneB
+
+def IsolatedPower(arr):
+    for player in arr:
+        ISO = player["SLG"] - player["AVG"]
+        player["ISO"] = ISO
+
+def BattingAverageBIP(arr):
+    for player in arr:
+        try:
+            BAbip = (player["H"] - player["HR"])/(player["AB"] - player["SO"] + player["SF"])
+            player["BAbip"] = round(BAbip,3)
+        except:
+            player["BAbip"] = "N/A"
+
+def OnBasePlusSluggingPlus(arr):
+    totalOBP, totalSLG, validPeople = leagueAverages(batterList)
+    for player in arr:
+        OPSPlus = ((player["OBP"]/totalOBP) + (player["SLG"]/totalSLG) - 1)*100
+        player["OPS+"] = round(OPSPlus)
+
+def WeightedOnBaseAverage(batting, pitching):
+    #Step 1
+    TotalIP = 0
+    for player in pitching:
+        TotalIP += player["IP"]
+    NumOuts = TotalIP * 3
+    TotalRuns = 0
+    for player in batting:
+        TotalRuns += player["R"]
+    RunsPerOut = TotalRuns/NumOuts
+    #Step 2/3
+    BBRV = RunsPerOut + 0.14
+    HBPRV = BBRV + 0.0251
+    OneBRV = BBRV + 0.155
+    TwoBRV = OneBRV + 0.3
+    ThreeBRV = TwoBRV + 0.27
+    HRRV = 2
+    #BBRV += 1
+    #HBPRV += 1
+    #OneBRV += 1
+    #TwoBRV += 1
+    #ThreeBRV += 1
+    #HRRV += 1
+    
+
+    #Calculate 1B
+    Singles(batterList)
+    #Calculate PA
+    PlateAppearances(batterList)
+    #Step 4
+    TotalBB = 0
+    for player in batting:
+        TotalBB += player["BB"]
+    TotalHBP = 0
+    for player in batting:
+        TotalHBP += player["HBP"]
+    TotalOneB = 0
+    for player in batting:
+        TotalOneB += player["1B"]
+    TotalTwoB = 0
+    for player in batting:
+        TotalTwoB += player["2B"]
+    TotalThreeB = 0
+    for player in batting:
+        TotalThreeB += player["3B"]
+    TotalHR = 0
+    for player in batting:
+        TotalHR += player["HR"]
+    TotalPA = 0
+    for player in batting:
+        TotalPA += player["PA"]
+    #Entire league wOBA
+    LeaguewOBA = ((BBRV*TotalBB) + (HBPRV*TotalHBP) + (OneBRV*TotalOneB) + (TwoBRV*TotalTwoB) + (ThreeBRV*TotalThreeB) + (HRRV*TotalHR))/TotalPA
+    #Step 5
+    totalOBP, totalSLG, validPeople = leagueAverages(batterList)
+    print(str(totalOBP/validPeople))
+    wOBAScale = (totalOBP/validPeople)/LeaguewOBA
+    #Step 6
+    BBRV = BBRV * wOBAScale
+    HBPRV = HBPRV * wOBAScale
+    OneBRV = OneBRV * wOBAScale
+    TwoBRV = TwoBRV * wOBAScale
+    ThreeBRV = ThreeBRV * wOBAScale
+    HRRV = HRRV * wOBAScale
+    #Step 7
+    for player in batting:
+        try:
+            player["wOBA"] = ((BBRV*player["BB"]) + (HBPRV*player["HBP"]) + (OneBRV*player["1B"]) + (TwoBRV*player["2B"]) + (ThreeBRV*player["3B"]) + (HRRV*player["HR"]))/(player["PA"])
+        except:
+            player["wOBA"] = "N/A"
+
 #streamlit app
 page = st.navigation([st.Page("Batters.py"), st.Page("Pitchers.py")])
 page.run()
