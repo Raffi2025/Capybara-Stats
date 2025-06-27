@@ -41,8 +41,8 @@ def generate_woba_percentile_graph(batterList):
     return fig
 
 #Display the percentile graph
-fig = generate_woba_percentile_graph(batterList)
-if fig:
-  st.pyplot(fig)
-else:
-  st.warning("No valid wOBA data available")
+#fig = generate_woba_percentile_graph(batterList)
+#if fig:
+  #st.pyplot(fig)
+#else:
+  #st.warning("No valid wOBA data available")
