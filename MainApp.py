@@ -212,18 +212,14 @@ def WeightedOnBaseAverage(batting, pitching):
     TwoBRV = OneBRV + 0.3
     ThreeBRV = TwoBRV + 0.27
     HRRV = 2
-    #BBRV += 1
-    #HBPRV += 1
-    #OneBRV += 1
-    #TwoBRV += 1
-    #ThreeBRV += 1
-    #HRRV += 1
+    BBRV += 1
+    HBPRV += 1
+    OneBRV += 1
+    TwoBRV += 1
+    ThreeBRV += 1
+    HRRV += 1
     
 
-    #Calculate 1B
-    Singles(batterList)
-    #Calculate PA
-    PlateAppearances(batterList)
     #Step 4
     TotalBB = 0
     for player in batting:
@@ -247,10 +243,9 @@ def WeightedOnBaseAverage(batting, pitching):
     for player in batting:
         TotalPA += player["PA"]
     #Entire league wOBA
+    global LeaguewOBA
     LeaguewOBA = ((BBRV*TotalBB) + (HBPRV*TotalHBP) + (OneBRV*TotalOneB) + (TwoBRV*TotalTwoB) + (ThreeBRV*TotalThreeB) + (HRRV*TotalHR))/TotalPA
-    #Step 5
-    totalOBP, totalSLG, validPeople = leagueAverages(batterList)
-    print(str(totalOBP/validPeople))
+    global wOBAScale
     wOBAScale = (totalOBP/validPeople)/LeaguewOBA
     #Step 6
     BBRV = BBRV * wOBAScale
@@ -265,6 +260,41 @@ def WeightedOnBaseAverage(batting, pitching):
             player["wOBA"] = ((BBRV*player["BB"]) + (HBPRV*player["HBP"]) + (OneBRV*player["1B"]) + (TwoBRV*player["2B"]) + (ThreeBRV*player["3B"]) + (HRRV*player["HR"]))/(player["PA"])
         except:
             player["wOBA"] = "N/A"
+
+
+def LeagueAveragewOBA(arr):
+    total = 0
+    for player in arr:
+        try:
+            total += player["wOBA"]
+        except:
+            total = total
+    return total
+
+
+def WeightedRunsAboveAverage(arr):
+    for player in arr:
+        try:
+            wRAA = (((player["wOBA"] - LeaguewOBA)/wOBAScale) * player["PA"])
+            player["wRAA"] = wRAA
+        except:
+            player["wRAA"] == "N/A"
+
+PlateAppearances(batterList)
+totalOBP, totalSLG, validPeople = leagueAverages(batterList)
+WalkPercentage(batterList)
+StrikeOutPercentage(batterList)
+StealSuccessRate(batterList)
+Singles(batterList)
+IsolatedPower(batterList)
+BattingAverageBIP(batterList)
+OnBasePlusSluggingPlus(batterList)
+WeightedOnBaseAverage(batterList, pitcherList)
+LAwOBA = LeagueAveragewOBA(batterList)
+WeightedRunsAboveAverage(batterList)
+
+
+
 
 #streamlit app
 page = st.navigation([st.Page("Batters.py"), st.Page("Pitchers.py")])
