@@ -278,7 +278,7 @@ def WeightedRunsAboveAverage(arr):
             wRAA = (((player["wOBA"] - LeaguewOBA)/wOBAScale) * player["PA"])
             player["wRAA"] = wRAA
         except:
-            player["wRAA"] == "N/A"
+            player["wRAA"] = "N/A"
 
 PlateAppearances(batterList)
 totalOBP, totalSLG, validPeople = leagueAverages(batterList)
