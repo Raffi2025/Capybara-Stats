@@ -45,4 +45,4 @@ fig = generate_woba_percentile_graph(batterList)
 if fig:
   st.pyplot(fig)
 else:
-  st.warning("No valid wOBA data available)
+  st.warning("No valid wOBA data available")
