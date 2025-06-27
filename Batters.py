@@ -11,7 +11,7 @@ st.subheader(f"Batters")
 st.write(data)
 
 #Percentile Graph
-st.subheader("Percentile Graph")
+st.subheader("wOBA Percentile Graph")
 
 #Generate the percentile graph for wOBA
 def generate_woba_percentile_graph(batterList):
